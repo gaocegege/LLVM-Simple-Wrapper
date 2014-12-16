@@ -1,0 +1,1 @@
+clang++ -g *.h *.cpp -lncurses `llvm-config --cxxflags --ldflags --libs` -O0

@@ -1,2 +1,4 @@
 #ignore the out file
 *.out
+*.out.dSYM/
+*.gch
