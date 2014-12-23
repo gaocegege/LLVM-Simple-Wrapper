@@ -1,1 +1,2 @@
-clang++ -g *.h *.cpp -lncurses `llvm-config --cxxflags --ldflags --libs` -O0
+clang++ -g *.h *.cpp -lncurses `llvm-config --cxxflags --libs core support jit native` `llvm-config --ldflags --system-libs` -O0
+# clang++ -g *.h *.cpp -lncurses `llvm-config --cxxflags --ldflags --libs` -O0
