@@ -32,58 +32,58 @@ void LLVMGenerator::mainProto()
 
 }
 
-llvm::Value* LLVMGenerator::call(std::string &callee, std::vector<std::string> arguments)
+llvm::Value* LLVMGenerator::call(std::string &callee, std::vector<llvm::Value *> arguments)
 {
 //todo
 	llvm::Function *CalleeF = module->getFunction(callee);
 	if (CalleeF == 0)
-		return ErrorV("Unknown function referenced");
+		return Error("Unknown function referenced");
 
 		// If argument mismatch Error.
 		if (CalleeF->arg_size() != arguments.size())
-		return ErrorV("Incorrect # arguments passed");
+		return Error("Incorrect # arguments passed");
 
 	return builder.CreateCall(CalleeF, arguments, "calltmp");
 }
 
-void LLVMGenerator::proto(std::string &name, std::vector<llvm::Value *> arguments)
+void LLVMGenerator::proto(std::string &name, std::vector<std::string> arguments)
 {
-	// only doubles now 
-	std::vector<Type*> Doubles(arguments.size(),
-                             llvm::Type::getDoubleTy(context));
-  	FunctionType *FT = FunctionType::get(llvm::Type::getDoubleTy(context),
-                                       Doubles, false);
+	// // only doubles now 
+	// std::vector<Type*> Doubles(arguments.size(),
+ //                             llvm::Type::getDoubleTy(context));
+ //  	FunctionType *FT = FunctionType::get(llvm::Type::getDoubleTy(context),
+ //                                       Doubles, false);
 
-  Function *F = Function::Create(FT, llvm::Function::ExternalLinkage, name, module);
-  if (F->getName() != name) {
-    // Delete the one we just made and get the existing one.
-    F->eraseFromParent();
-    F = module->getFunction(name);
+ //  Function *F = Function::Create(FT, llvm::Function::ExternalLinkage, name, module);
+ //  if (F->getName() != name) {
+ //    // Delete the one we just made and get the existing one.
+ //    F->eraseFromParent();
+ //    F = module->getFunction(name);
     
-    // If F already has a body, reject this.
-    if (!F->empty()) {
-      Error("redefinition of function");
-      return 0;
-    }
+ //    // If F already has a body, reject this.
+ //    if (!F->empty()) {
+ //      Error("redefinition of function");
+ //      return 0;
+ //    }
     
-    // If F took a different number of args, reject.
-    if (F->arg_size() != arguments.size()) {
-      Error("redefinition of function with different # args");
-      return 0;
-    }
-  }
+ //    // If F took a different number of args, reject.
+ //    if (F->arg_size() != arguments.size()) {
+ //      Error("redefinition of function with different # args");
+ //      return 0;
+ //    }
+ //  }
   
-  // Set names for all arguments.
-  unsigned Idx = 0;
-  for (Function::arg_iterator AI = F->arg_begin(); Idx != arguments.size();
-       ++AI, ++Idx) {
-    AI->setName(arguments[Idx]);
+ //  // Set names for all arguments.
+ //  unsigned Idx = 0;
+ //  for (Function::arg_iterator AI = F->arg_begin(); Idx != arguments.size();
+ //       ++AI, ++Idx) {
+ //    AI->setName(arguments[Idx]);
     
-    // Add arguments to variable symbol table.
-    // NamedValues[arguments[Idx]] = AI;
-  }
+ //    // Add arguments to variable symbol table.
+ //    // NamedValues[arguments[Idx]] = AI;
+ //  }
   
-  return F;
+ //  return F;
 }
 
 void LLVMGenerator::retVoid()
@@ -154,7 +154,7 @@ void LLVMGenerator::array()
 //todo
 }
 
-void LLVMGenerator::externalFunc()
+void LLVMGenerator::external()
 {
 //todo
 }
