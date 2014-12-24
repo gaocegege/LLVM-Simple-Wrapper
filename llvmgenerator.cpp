@@ -46,44 +46,75 @@ llvm::Value* LLVMGenerator::call(const std::string &callee, const std::vector<ll
 	return builder.CreateCall(CalleeF, arguments, "calltmp");
 }
 
-void LLVMGenerator::proto(const std::string &name, const std::vector<std::string> &arguments)
+llvm::Function *LLVMGenerator::proto(const std::string &name, const std::vector<std::string> &arguments)
 {
-	// // only doubles now 
-	// std::vector<Type*> Doubles(arguments.size(),
- //                             llvm::Type::getDoubleTy(context));
- //  	FunctionType *FT = FunctionType::get(llvm::Type::getDoubleTy(context),
- //                                       Doubles, false);
+	// only doubles now 
+	std::vector<llvm::Type *> Doubles(arguments.size(),
+	                         llvm::Type::getDoubleTy(context));
+	// the return type only supports double now
+		llvm::FunctionType *FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(context),
+	                                   Doubles, false);
 
- //  Function *F = Function::Create(FT, llvm::Function::ExternalLinkage, name, module);
- //  if (F->getName() != name) {
- //    // Delete the one we just made and get the existing one.
- //    F->eraseFromParent();
- //    F = module->getFunction(name);
-    
- //    // If F already has a body, reject this.
- //    if (!F->empty()) {
- //      Error("redefinition of function");
- //      return 0;
- //    }
-    
- //    // If F took a different number of args, reject.
- //    if (F->arg_size() != arguments.size()) {
- //      Error("redefinition of function with different # args");
- //      return 0;
- //    }
- //  }
+	llvm::Function *F = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, name, module);
+	if (F->getName() != name) 
+	{
+		// Delete the one we just made and get the existing one.
+		F->eraseFromParent();
+		F = module->getFunction(name);
+
+		// If F already has a body, reject this.
+		if (!F->empty()) 
+		{
+	  		Error("redefinition of function");
+	  		return 0;
+		}
+
+		// If F took a different number of args, reject.
+		if (F->arg_size() != arguments.size()) 
+		{
+	  		Error("redefinition of function with different # args");
+	  		return 0;
+		}
+	}
+
+	// Set names for all arguments.
+	unsigned Idx = 0;
+	for (llvm::Function::arg_iterator AI = F->arg_begin(); Idx != arguments.size();
+	   ++AI, ++Idx) {
+		AI->setName(arguments[Idx]);
+
+		// Add arguments to variable symbol table.
+		// NamedValues[arguments[Idx]] = AI;
+	}
+
+	return F;
+}
+
+llvm::Function *LLVMGenerator::func(const std::string &name, const std::vector<std::string> &arguments)
+{
+	llvm::Function *TheFunction = proto(name, arguments);
+  	if (TheFunction == 0)
+    	return 0;
   
- //  // Set names for all arguments.
- //  unsigned Idx = 0;
- //  for (Function::arg_iterator AI = F->arg_begin(); Idx != arguments.size();
- //       ++AI, ++Idx) {
- //    AI->setName(arguments[Idx]);
-    
- //    // Add arguments to variable symbol table.
- //    // NamedValues[arguments[Idx]] = AI;
- //  }
-  
- //  return F;
+  	// Create a new basic block to start insertion into.
+  	llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry", TheFunction);
+  	builder.SetInsertPoint(BB);
+
+ //  	// generate the body code
+	// if (Value *RetVal = Body->Codegen()) 
+	// {
+	// 	// Finish off the function.
+	// 	builder.CreateRet(RetVal);
+
+	// // Validate the generated code, checking for consistency.
+	// verifyFunction(*TheFunction);
+
+	// return TheFunction;
+	// }
+
+	// Error reading body, remove function.
+	TheFunction->eraseFromParent();
+	return 0;
 }
 
 void LLVMGenerator::retVoid()
@@ -116,6 +147,7 @@ llvm::Value* LLVMGenerator::doubleNum(const double &num)
 llvm::Value* LLVMGenerator::identifier(const std::string &name)
 {
 	//TODO
+	return 0;
 }
 
 llvm::Value *LLVMGenerator::expression(const char &op, const int &left, const int &right)

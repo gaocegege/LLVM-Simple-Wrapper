@@ -38,7 +38,8 @@ namespace llvmgenerator
 		// name->		function name
 		// arguments->	function arguments
 		// $return->	//todo	
-		void proto(const std::string &name, const std::vector<std::string> &arguments);
+		llvm::Function *proto(const std::string &name, const std::vector<std::string> &arguments);
+		llvm::Function *func(const std::string &name, const std::vector<std::string> &arguments);
 		void retVoid();
 		void ret(llvm::Value *val);
 		// class define
