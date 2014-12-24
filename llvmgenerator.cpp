@@ -32,7 +32,7 @@ void LLVMGenerator::mainProto()
 
 }
 
-llvm::Value* LLVMGenerator::call(std::string &callee, std::vector<llvm::Value *> arguments)
+llvm::Value* LLVMGenerator::call(const std::string &callee, const std::vector<llvm::Value *> &arguments)
 {
 //todo
 	llvm::Function *CalleeF = module->getFunction(callee);
@@ -46,7 +46,7 @@ llvm::Value* LLVMGenerator::call(std::string &callee, std::vector<llvm::Value *>
 	return builder.CreateCall(CalleeF, arguments, "calltmp");
 }
 
-void LLVMGenerator::proto(std::string &name, std::vector<std::string> arguments)
+void LLVMGenerator::proto(const std::string &name, const std::vector<std::string> &arguments)
 {
 	// // only doubles now 
 	// std::vector<Type*> Doubles(arguments.size(),
@@ -102,23 +102,23 @@ void LLVMGenerator::classDef()
 //todo
 }
 
-llvm::Value* LLVMGenerator::integerNum(int num)
+llvm::Value* LLVMGenerator::integerNum(const int &num)
 {
 	// may have a bug
 	return llvm::ConstantInt::get(context, llvm::APInt(32, num, true));  
 }
 
-llvm::Value* LLVMGenerator::doubleNum(double num)
+llvm::Value* LLVMGenerator::doubleNum(const double &num)
 {
 	return llvm::ConstantFP::get(context, llvm::APFloat(num));
 }
 
-llvm::Value* LLVMGenerator::identifier(std::string name)
+llvm::Value* LLVMGenerator::identifier(const std::string &name)
 {
 	//TODO
 }
 
-llvm::Value *LLVMGenerator::expression(char op, int left, int right)
+llvm::Value *LLVMGenerator::expression(const char &op, const int &left, const int &right)
 {
 //todo
 
@@ -152,7 +152,7 @@ llvm::Value *LLVMGenerator::expression(char op, int left, int right)
 	return result;
 }
 
-llvm::Value *LLVMGenerator::expression(char op, double left, double right)
+llvm::Value *LLVMGenerator::expression(const char &op, const double &left, const double &right)
 {
 //todo
 
@@ -196,7 +196,7 @@ void LLVMGenerator::external()
 //todo
 }
 
-llvm::Function *LLVMGenerator::getFuncName(std::string funcname)
+llvm::Function *LLVMGenerator::getFuncName(const std::string &funcname)
 {
 	return module->getFunction(funcname);
 }

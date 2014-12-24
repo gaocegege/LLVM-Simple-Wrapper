@@ -33,25 +33,25 @@ namespace llvmgenerator
 		// callee->		function name
 		// arguments->	function arguments
 		// $return->	//todo
-		llvm::Value *call(std::string &callee, std::vector<llvm::Value *> arguments);
+		llvm::Value *call(const std::string &callee, const std::vector<llvm::Value *> &arguments);
 		
 		// name->		function name
 		// arguments->	function arguments
 		// $return->	//todo	
-		void proto(std::string &name, std::vector<std::string> arguments);
+		void proto(const std::string &name, const std::vector<std::string> &arguments);
 		void retVoid();
 		void ret(llvm::Value *val);
 		// class define
 		void classDef();
 
 		// var define
-		llvm::Value *integerNum(int num);
-		llvm::Value *doubleNum(double num);
-		llvm::Value *identifier(std::string name);
+		llvm::Value *integerNum(const int &num);
+		llvm::Value *doubleNum(const double &num);
+		llvm::Value *identifier(const std::string &name);
 		// expression
 		// void binaryExp(std::string &op, );
-		llvm::Value *expression(char op, int left, int right);
-		llvm::Value *expression(char op, double left, double right);
+		llvm::Value *expression(const char &op, const int &left, const int &right);
+		llvm::Value *expression(const char &op, const double &left, const double &right);
 		// array define
 		void array();
 
@@ -60,7 +60,7 @@ namespace llvmgenerator
 
 		//debuger help func
 		void dump();
-		llvm::Function *getFuncName(std::string funcname);
+		llvm::Function *getFuncName(const std::string &funcname);
 		void run(llvm::Function *F);
 
 	private:
