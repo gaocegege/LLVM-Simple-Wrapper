@@ -45,12 +45,13 @@ namespace llvmgenerator
 		void classDef();
 
 		// var define
-		llvm::Value* integerNum(int num);
-		llvm::Value* doubleNum(double num);
-		llvm::Value* identifier(std::string name);
+		llvm::Value *integerNum(int num);
+		llvm::Value *doubleNum(double num);
+		llvm::Value *identifier(std::string name);
 		// expression
 		// void binaryExp(std::string &op, );
 		llvm::Value *expression(char op, int left, int right);
+		llvm::Value *expression(char op, double left, double right);
 		// array define
 		void array();
 

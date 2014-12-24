@@ -21,7 +21,7 @@ LLVMGenerator::~LLVMGenerator()
 void LLVMGenerator::mainProto()
 {
 	// set the return type
-	llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getDoubleTy(context), false);
+	llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getInt32Ty(context), false);
 	// get the main func
 	llvm::Function *mainFunc = 
     llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, "main", module);
@@ -104,7 +104,8 @@ void LLVMGenerator::classDef()
 
 llvm::Value* LLVMGenerator::integerNum(int num)
 {
-	return llvm::ConstantFP::get(context, llvm::APFloat(double(num)));
+	// may have a bug
+	return llvm::ConstantInt::get(context, llvm::APInt(32, num, true));  
 }
 
 llvm::Value* LLVMGenerator::doubleNum(double num)
@@ -120,13 +121,48 @@ llvm::Value* LLVMGenerator::identifier(std::string name)
 llvm::Value *LLVMGenerator::expression(char op, int left, int right)
 {
 //todo
+
+	llvm::Value *result;
+	llvm::Value *leftSide = integerNum(left);
+	llvm::Value	*rightSide = integerNum(right);
+
 	std::cout << "Wrapper:";
 	std::cout << left << op << right << std::endl;
 	std::cout << "result: ";
+	switch(op)
+	{
+		case '+':
+			std::cout << left + right << std::endl;
+			result = builder.CreateAdd(leftSide, rightSide, "addtmp");
+			break;
+		case '-':
+			std::cout << left - right << std::endl;
+			result = builder.CreateSub(leftSide, rightSide, "subtmp");
+			break;
+		case '*':
+			std::cout << left * right << std::endl;
+			result = builder.CreateMul(leftSide, rightSide, "multmp");
+			break;
+		case '/':
+			std::cout << left / right << std::endl;
+			//signed int div~?
+			result = builder.CreateSDiv(leftSide, rightSide, "divtmp");
+			break;
+	}
+	return result;
+}
+
+llvm::Value *LLVMGenerator::expression(char op, double left, double right)
+{
+//todo
 
 	llvm::Value *result;
-	llvm::Value *leftSide = llvm::ConstantFP::get(context, llvm::APFloat(double(left)));
-	llvm::Value	*rightSide = llvm::ConstantFP::get(context, llvm::APFloat(double(right)));
+	llvm::Value *leftSide = doubleNum(left);
+	llvm::Value	*rightSide = doubleNum(right);
+
+	std::cout << "Wrapper:";
+	std::cout << left << op << right << std::endl;
+	std::cout << "result: ";
 	switch(op)
 	{
 		case '+':
@@ -143,6 +179,7 @@ llvm::Value *LLVMGenerator::expression(char op, int left, int right)
 			break;
 		case '/':
 			std::cout << left / right << std::endl;
+			//signed int div~?
 			result = builder.CreateFDiv(leftSide, rightSide, "divtmp");
 			break;
 	}
@@ -185,6 +222,6 @@ void LLVMGenerator::run(llvm::Function *F)
 	std::cout << "Get The Pointer...\n";
 	// Cast it to the right type (takes no arguments, returns a double) so we
 	// can call it as a native function.
-	double (*FP)() = (double (*)())(intptr_t)FPtr;
-	fprintf(stderr, "Evaluated: %f\n", FP());  
+	int (*FP)() = (int (*)())(intptr_t)FPtr;
+	fprintf(stderr, "Evaluated: %d\n", FP());  
 }
