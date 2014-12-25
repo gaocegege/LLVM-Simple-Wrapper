@@ -10,7 +10,7 @@ llvm::IRBuilder<> LLVMGenerator::builder = llvm::IRBuilder<>(LLVMGenerator::cont
 
 LLVMGenerator::LLVMGenerator()
 {
-
+	externalPrint();
 }
 
 LLVMGenerator::~LLVMGenerator()

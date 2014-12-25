@@ -8,7 +8,7 @@ int main()
 	arg = testClass.integerNum(1);
 	v.push_back("x");
 	testClass.mainProto();
-	testClass.externalPrint();
+	testClass.callPrint(arg);
 	testClass.callPrint(arg);
 	testClass.ret(testClass.expression('/', 1, 2));
 	testClass.dump();
