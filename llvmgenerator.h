@@ -34,7 +34,7 @@ namespace llvmgenerator
 		// arguments->	function arguments
 		// $return->	//todo
 		llvm::Value *call(const std::string &callee, const std::vector<llvm::Value *> &arguments);
-		
+		llvm::Value *callPrint(llvm::Value *arg);
 		// name->		function name
 		// arguments->	function arguments
 		// $return->	//todo	
@@ -46,6 +46,7 @@ namespace llvmgenerator
 		void classDef();
 
 		// var define
+		llvm::Value *globalString(const std::string &num);
 		llvm::Value *integerNum(const int &num);
 		llvm::Value *doubleNum(const double &num);
 		llvm::Value *identifier(const std::string &name);
@@ -57,7 +58,7 @@ namespace llvmgenerator
 		void array();
 
 		// external function define
-		void external();
+		llvm::Constant *externalPrint();
 
 		//debuger help func
 		void dump();

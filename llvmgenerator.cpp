@@ -46,6 +46,16 @@ llvm::Value* LLVMGenerator::call(const std::string &callee, const std::vector<ll
 	return builder.CreateCall(CalleeF, arguments, "calltmp");
 }
 
+llvm::Value *LLVMGenerator::callPrint(llvm::Value *arg)
+{
+	llvm::Value *callee = externalPrint();
+	std::vector<llvm::Value *> v;
+	v.push_back(arg);
+	v.insert(v.begin(), builder.CreateGlobalStringPtr("output: %d\t\n"));
+	std::cout << v[0] << std::endl;
+	return builder.CreateCall(callee, v, "PRINT_via_printf");
+}
+
 llvm::Function *LLVMGenerator::proto(const std::string &name, const std::vector<std::string> &arguments)
 {
 	// only doubles now 
@@ -131,6 +141,11 @@ void LLVMGenerator::ret(llvm::Value *val)
 void LLVMGenerator::classDef()
 {
 //todo
+}
+
+llvm::Value *LLVMGenerator::globalString(const std::string &num)
+{
+	return builder.CreateGlobalStringPtr(num);
 }
 
 llvm::Value* LLVMGenerator::integerNum(const int &num)
@@ -223,9 +238,17 @@ void LLVMGenerator::array()
 //todo
 }
 
-void LLVMGenerator::external()
+llvm::Constant *LLVMGenerator::externalPrint()
 {
 //todo
+	std::vector<llvm::Type *> args;
+	args.push_back(builder.getInt8PtrTy());
+
+	llvm::Constant *printf_func = module->getOrInsertFunction("printf",
+										llvm::FunctionType::get(builder.getInt32Ty(), args,
+		/*must be true to get other params*/true));
+
+	return printf_func;
 }
 
 llvm::Function *LLVMGenerator::getFuncName(const std::string &funcname)
