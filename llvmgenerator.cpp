@@ -162,8 +162,11 @@ llvm::Value* LLVMGenerator::doubleNum(const double &num)
 
 llvm::Value* LLVMGenerator::identifier(const std::string &name)
 {
-	//TODO
-	return 0;
+	// bug
+	// only support int now
+	llvm::Value *newval = builder.CreateAlloca(llvm::Type::getInt32Ty(context), 0, name);
+	builder.CreateStore( llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(context));, newval);
+	return newval;
 }
 
 llvm::Value *LLVMGenerator::expression(const char &op, const int &left, const int &right)
