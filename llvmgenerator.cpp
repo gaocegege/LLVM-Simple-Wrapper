@@ -162,7 +162,6 @@ llvm::Value* LLVMGenerator::doubleNum(const double &num)
 
 llvm::Value* LLVMGenerator::identifier(const std::string &name)
 {
-	//TODO
 	return 0;
 }
 
