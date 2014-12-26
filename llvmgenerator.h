@@ -53,12 +53,13 @@ namespace llvmgenerator
 		llvm::Value *doubleNum(const double &num);
 		llvm::Value *identifier(const std::string &name);
 
+		// array define
+		llvm::Value *array(const std::string &name);
+
 		// expression
 		llvm::Value *expression(const char &op, const int &left, const int &right);
 		llvm::Value *expression(const char &op, const double &left, const double &right);
 		llvm::Value *expression(const char &op, llvm::Value *leftSide, llvm::Value *rightSide);
-		// array define
-		void array();
 
 		// control flow
 		llvm::Value *ifStat(llvm::Value *cond);

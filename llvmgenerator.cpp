@@ -165,7 +165,26 @@ llvm::Value* LLVMGenerator::identifier(const std::string &name)
 	// bug
 	// only support int now
 	llvm::Value *newval = builder.CreateAlloca(llvm::Type::getInt32Ty(context), 0, name);
-	builder.CreateStore( llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(context));, newval);
+	// builder.CreateStore( llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(context)), newval);
+	return newval;
+}
+
+llvm::Value *LLVMGenerator::array(const std::string &name)
+{
+//todo
+	static llvm::Type * arraytype =NULL;
+	if(!arraytype){
+		std::vector<llvm::Type*>	members;
+
+		// members.push_back(llvm::Type::getInt8PtrTy(context));
+
+ 		members.push_back(llvm::Type::getInt32Ty(context));
+		members.push_back(llvm::Type::getInt32Ty(context));
+		members.push_back(llvm::Type::getInt32Ty(context));
+
+		arraytype = llvm::StructType::create(members,"QBArray");
+	}
+	llvm::Value *newval = builder.CreateAlloca(arraytype ,0, name);
 	return newval;
 }
 
@@ -273,11 +292,6 @@ llvm::Value *LLVMGenerator::expression(const char &op, llvm::Value *leftSide, ll
 			return 0;
 	}
 	return result;
-}
-
-void LLVMGenerator::array()
-{
-//todo
 }
 
 llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
