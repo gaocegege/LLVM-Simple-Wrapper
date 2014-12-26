@@ -8,10 +8,19 @@ int main()
 	arg = testClass.integerNum(1);
 	v.push_back("x");
 	testClass.mainProto();
+
+	// test for define
 	llvm::Value *val = testClass.identifier("gaoce");
-	llvm::Value *valarr = testClass.array("gaocegege");
-	llvm::Value *buf = testClass.getValue(val);
-	testClass.callPrint(buf);
+	llvm::Value *valarr = testClass.array("gaocegege", 3);
+
+	//test for set values
+	testClass.setArrayValue(valarr, testClass.integerNum(10), 1);
+	testClass.setValue(val, testClass.integerNum(10));
+
+	//test for get values
+	testClass.callPrint(testClass.getArrayValue(valarr, 1));
+	testClass.callPrint(testClass.getValue(val));
+
 	testClass.ret(testClass.expression('+', buf, buf));
 	testClass.run(testClass.getFuncName("main"));
 }

@@ -172,22 +172,50 @@ llvm::Value* LLVMGenerator::identifier(const std::string &name)
 llvm::Value *LLVMGenerator::array(const std::string &name, int size)
 {
 //todo
-	static llvm::Type * arraytype =NULL;
-	if(!arraytype){
-		std::vector<llvm::Type*> members;
+	// static llvm::Type * arraytype =NULL;
+	// if(!arraytype){
+	// 	std::vector<llvm::Type*> members;
 
- 		for (int i = 0; i < size; i++)
- 			members.push_back(llvm::Type::getInt32Ty(context));
+ // 		for (int i = 0; i < size; i++)
+ // 			members.push_back(llvm::Type::getInt32Ty(context));
 
-		arraytype = llvm::StructType::create(members,"Array");
-	}
-	llvm::Value *newval = builder.CreateAlloca(arraytype ,0, name);
+	// 	arraytype = llvm::StructType::create(members,"Array");
+	// }
+	// llvm::Value *newval = builder.CreateAlloca(arraytype ,0, name);
+
+	// std::vector<llvm::Type *> args;
+	// args.push_back(builder.getInt8PtrTy());
+	// args.push_back(builder.getInt32Ty());
+
+	// llvm::Constant *func = module->getOrInsertFunction("btr_qbarray_new",
+	// 		llvm::FunctionType::get(builder.getVoidTy(), args, false));
+	// builder.CreateCall2(func, newval, integerNum(size));
+	// return newval;
+
+	llvm::Value *newval = builder.CreateAlloca(llvm::Type::getInt32Ty(context), integerNum(size), name);
 	return newval;
 }
 
 llvm::Value *LLVMGenerator::getValue(llvm::Value *name)
 {
 	return builder.CreateLoad(name);
+}
+
+llvm::Value *LLVMGenerator::getArrayValue(llvm::Value *name, int index)
+{
+	llvm::Value *result = builder.CreateGEP(name, integerNum(index));
+	return builder.CreateLoad(result);
+}
+
+llvm::Value *LLVMGenerator::setValue(llvm::Value *name, llvm::Value *value)
+{
+	return builder.CreateStore(value, name);
+}
+
+llvm::Value *LLVMGenerator::setArrayValue(llvm::Value *name, llvm::Value *value, int index)
+{
+	llvm::Value *pos = builder.CreateGEP(name, integerNum(index));
+	return builder.CreateStore(value, pos);
 }
 
 llvm::Value *LLVMGenerator::expression(const char &op, const int &left, const int &right)

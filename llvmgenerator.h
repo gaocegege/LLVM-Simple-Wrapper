@@ -58,6 +58,11 @@ namespace llvmgenerator
 
 		// value get
 		llvm::Value *getValue(llvm::Value *name);
+		llvm::Value *getArrayValue(llvm::Value *name, int index);
+
+		// value set
+		llvm::Value *setValue(llvm::Value *name, llvm::Value *value);
+		llvm::Value *setArrayValue(llvm::Value *name, llvm::Value *value, int index);
 
 		// expression
 		llvm::Value *expression(const char &op, const int &left, const int &right);
