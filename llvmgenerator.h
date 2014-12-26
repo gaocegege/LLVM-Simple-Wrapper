@@ -27,6 +27,7 @@ namespace llvmgenerator
 	public:
 		LLVMGenerator();
 		~LLVMGenerator();
+
 		// main block
 		void mainProto();
 
@@ -35,14 +36,15 @@ namespace llvmgenerator
 		// $return->	//todo
 		llvm::Value *call(const std::string &callee, const std::vector<llvm::Value *> &arguments);
 		llvm::Value *callPrint(llvm::Value *arg);
+
 		// name->		function name
 		// arguments->	function arguments
 		// $return->	//todo	
-		llvm::Function *proto(const std::string &name, const std::vector<std::string> &arguments);
 		llvm::Function *func(const std::string &name, const std::vector<std::string> &arguments);
 		void retVoid();
 		void ret(llvm::Value *val);
-		// class define
+
+		// class define*
 		void classDef();
 
 		// var define
@@ -50,17 +52,21 @@ namespace llvmgenerator
 		llvm::Value *integerNum(const int &num);
 		llvm::Value *doubleNum(const double &num);
 		llvm::Value *identifier(const std::string &name);
+
 		// expression
-		// void binaryExp(std::string &op, );
 		llvm::Value *expression(const char &op, const int &left, const int &right);
 		llvm::Value *expression(const char &op, const double &left, const double &right);
+		llvm::Value *expression(const char &op, llvm::Value *leftSide, llvm::Value *rightSide);
 		// array define
 		void array();
+
+		// control flow
+		llvm::Value *ifStat(llvm::Value *cond);
 
 		// external function define
 		llvm::Constant *externalPrint();
 
-		//debuger help func
+		//debuger help func and JIT
 		void dump();
 		llvm::Function *getFuncName(const std::string &funcname);
 		void run(llvm::Function *F);
@@ -69,11 +75,10 @@ namespace llvmgenerator
 		static llvm::LLVMContext &context;
 		static llvm::Module *module;
 		static llvm::IRBuilder<> builder;
-		//JIT
-		// static llvm::ExecutionEngine *executeEngine;
-
 		llvm::Value *Error(const char *Str){std::cout << "Err\n";return 0;}
 		
+		//func proto
+		llvm::Function *proto(const std::string &name, const std::vector<std::string> &arguments);
 	};
 }
 

@@ -123,8 +123,9 @@ llvm::Function *LLVMGenerator::func(const std::string &name, const std::vector<s
 	// }
 
 	// Error reading body, remove function.
-	TheFunction->eraseFromParent();
-	return 0;
+	// TheFunction->eraseFromParent();
+	// return 0;
+	return TheFunction;
 }
 
 void LLVMGenerator::retVoid()
@@ -172,10 +173,6 @@ llvm::Value *LLVMGenerator::expression(const char &op, const int &left, const in
 	llvm::Value *result;
 	llvm::Value *leftSide = integerNum(left);
 	llvm::Value	*rightSide = integerNum(right);
-
-	std::cout << "Wrapper:";
-	std::cout << left << op << right << std::endl;
-	std::cout << "result: ";
 	switch(op)
 	{
 		case '+':
@@ -195,6 +192,14 @@ llvm::Value *LLVMGenerator::expression(const char &op, const int &left, const in
 			//signed int div~?
 			result = builder.CreateSDiv(leftSide, rightSide, "divtmp");
 			break;
+		//have bugs:double
+		case '<':
+    		leftSide = builder.CreateFCmpULT(leftSide, rightSide, "cmptmp");
+    		// Convert bool 0/1 to double 0.0 or 1.0
+    		return builder.CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
+                                "booltmp");
+		default:
+			return 0;
 	}
 	return result;
 }
@@ -206,10 +211,6 @@ llvm::Value *LLVMGenerator::expression(const char &op, const double &left, const
 	llvm::Value *result;
 	llvm::Value *leftSide = doubleNum(left);
 	llvm::Value	*rightSide = doubleNum(right);
-
-	std::cout << "Wrapper:";
-	std::cout << left << op << right << std::endl;
-	std::cout << "result: ";
 	switch(op)
 	{
 		case '+':
@@ -229,6 +230,44 @@ llvm::Value *LLVMGenerator::expression(const char &op, const double &left, const
 			//signed int div~?
 			result = builder.CreateFDiv(leftSide, rightSide, "divtmp");
 			break;
+		//have bugs:double
+		case '<':
+    		leftSide = builder.CreateFCmpULT(leftSide, rightSide, "cmptmp");
+    		// Convert bool 0/1 to double 0.0 or 1.0
+    		return builder.CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
+                                "booltmp");
+		default:
+			return 0;
+	}
+	return result;
+}
+
+llvm::Value *LLVMGenerator::expression(const char &op, llvm::Value *leftSide, llvm::Value *rightSide)
+{
+	llvm::Value *result;
+	switch(op)
+	{
+		case '+':
+			result = builder.CreateFAdd(leftSide, rightSide, "addtmp");
+			break;
+		case '-':
+			result = builder.CreateFSub(leftSide, rightSide, "subtmp");
+			break;
+		case '*':
+			result = builder.CreateFMul(leftSide, rightSide, "multmp");
+			break;
+		case '/':
+			//signed int div~?
+			result = builder.CreateFDiv(leftSide, rightSide, "divtmp");
+			break;
+		//have bugs:double
+		case '<':
+    		leftSide = builder.CreateFCmpULT(leftSide, rightSide, "cmptmp");
+    		// Convert bool 0/1 to double 0.0 or 1.0
+    		return builder.CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
+                                "booltmp");
+		default:
+			return 0;
 	}
 	return result;
 }
@@ -238,9 +277,13 @@ void LLVMGenerator::array()
 //todo
 }
 
+llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
+{
+	return 0;
+}
+
 llvm::Constant *LLVMGenerator::externalPrint()
 {
-//todo
 	std::vector<llvm::Type *> args;
 	args.push_back(builder.getInt8PtrTy());
 
