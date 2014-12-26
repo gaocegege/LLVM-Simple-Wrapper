@@ -207,6 +207,12 @@ llvm::Value *LLVMGenerator::getArrayValue(llvm::Value *name, int index)
 	return builder.CreateLoad(result);
 }
 
+llvm::Value *LLVMGenerator::getArrayValue(llvm::Value *name, llvm::Value *index)
+{
+	llvm::Value *result = builder.CreateGEP(name, index);
+	return builder.CreateLoad(result);
+}
+
 llvm::Value *LLVMGenerator::setValue(llvm::Value *name, llvm::Value *value)
 {
 	return builder.CreateStore(value, name);
@@ -215,6 +221,12 @@ llvm::Value *LLVMGenerator::setValue(llvm::Value *name, llvm::Value *value)
 llvm::Value *LLVMGenerator::setArrayValue(llvm::Value *name, llvm::Value *value, int index)
 {
 	llvm::Value *pos = builder.CreateGEP(name, integerNum(index));
+	return builder.CreateStore(value, pos);
+}
+
+llvm::Value *LLVMGenerator::setArrayValue(llvm::Value *name, llvm::Value *value, llvm::Value *index)
+{
+	llvm::Value *pos = builder.CreateGEP(name, index);
 	return builder.CreateStore(value, pos);
 }
 

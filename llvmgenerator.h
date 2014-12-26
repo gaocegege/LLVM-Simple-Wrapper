@@ -52,17 +52,17 @@ namespace llvmgenerator
 		llvm::Value *integerNum(const int &num);
 		llvm::Value *doubleNum(const double &num);
 		llvm::Value *identifier(const std::string &name);
-
-		// array define
 		llvm::Value *array(const std::string &name, int size);
 
 		// value get
 		llvm::Value *getValue(llvm::Value *name);
 		llvm::Value *getArrayValue(llvm::Value *name, int index);
+		llvm::Value *getArrayValue(llvm::Value *name, llvm::Value *index);
 
 		// value set
 		llvm::Value *setValue(llvm::Value *name, llvm::Value *value);
 		llvm::Value *setArrayValue(llvm::Value *name, llvm::Value *value, int index);
+		llvm::Value *setArrayValue(llvm::Value *name, llvm::Value *value, llvm::Value *index);
 
 		// expression
 		llvm::Value *expression(const char &op, const int &left, const int &right);
