@@ -70,7 +70,10 @@ namespace llvmgenerator
 		llvm::Value *expression(const char &op, llvm::Value *leftSide, llvm::Value *rightSide);
 
 		// control flow
+		// just for look
+		// bug
 		llvm::Value *ifStat(llvm::Value *cond);
+		llvm::Value *whileStat();
 
 		// label
 		llvm::BasicBlock *createBlock(const std::string &name, llvm::Function *func);

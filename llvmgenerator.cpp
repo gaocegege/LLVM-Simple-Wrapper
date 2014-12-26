@@ -382,6 +382,36 @@ llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
   	return PN;
 }
 
+llvm::Value *LLVMGenerator::whileStat()
+{
+	Function *TheFunction = builder.GetInsertBlock()->getParent();
+	llvm::BasicBlock* cond_while =
+		llvm::BasicBlock::Create(context, "while", TheFunction);
+
+	llvm::BasicBlock* while_body =
+		llvm::BasicBlock::Create(context, "whileloop", TheFunction);
+
+	llvm::BasicBlock* cond_continue =
+		llvm::BasicBlock::Create(context, "whileend", TheFunction);
+
+	builder.CreateBr(cond_while);
+	builder.SetInsertPoint(cond_while);
+
+	llvm::Value * expcond = cond->codegen();
+	expcond = builder.CreateIntCast(expcond, llvm::Type::getInt1Ty(context);,true);
+	expcond = builder.CreateICmpEQ(expcond, llvm::ConstantInt::get(context,llvm::APInt(1,0,true)), "tmp");
+
+	builder.CreateCondBr(expcond, cond_continue, while_body);
+
+	while_body = body->codegen();
+	builder.SetInsertPoint(while_body);
+	builder.CreateBr(cond_while);
+
+	cond_continue->moveAfter(while_body);
+	
+	return cond_continue;
+}
+
 llvm::BasicBlock *LLVMGenerator::createBlock(const std::string &name, llvm::Function *func)
 {
 	llvm::BasicBlock* block = llvm::BasicBlock::Create(context, name, func);
