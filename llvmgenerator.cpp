@@ -279,7 +279,48 @@ void LLVMGenerator::array()
 
 llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
 {
-	return 0;
+	llvm::Value *CondV = builder.CreateFCmpONE(cond,
+                              llvm::ConstantFP::get(context, APFloat(0.0)),
+                                "ifcond");
+	Function *TheFunction = Builder.GetInsertBlock()->getParent();
+
+	// Create blocks for the then and else cases.  Insert the 'then' block at the
+	// end of the function.
+	llvm::BasicBlock *ThenBB = llvm::BasicBlock::Create(context, "then", TheFunction);
+	llvm::BasicBlock *ElseBB = llvm::BasicBlock::Create(context, "else");
+	llvm::BasicBlock *MergeBB = llvm::BasicBlock::Create(context, "ifcont");
+
+	builder.CreateCondBr(CondV, ThenBB, ElseBB);
+
+	builder.SetInsertPoint(ThenBB);
+
+	//generate then block
+	// llvm::Value *ThenV = Then->Codegen();
+
+  	builder.CreateBr(MergeBB);
+  	// Codegen of 'Then' can change the current block, update ThenBB for the PHI.
+  	ThenBB = builder.GetInsertBlock();
+
+  	// Emit else block.
+  	TheFunction->getBasicBlockList().push_back(ElseBB);
+  	builder.SetInsertPoint(ElseBB);
+
+  	//generate else block
+  	// Value *ElseV = Else->Codegen();
+
+  	builder.CreateBr(MergeBB);
+  	// Codegen of 'Else' can change the current block, update ElseBB for the PHI.
+  	ElseBB = builder.GetInsertBlock();
+
+  	// Emit merge block.
+  	TheFunction->getBasicBlockList().push_back(MergeBB);
+  	builder.SetInsertPoint(MergeBB);
+  	llvm::PHINode *PN =
+      builder.CreatePHI(Type::getDoubleTy(getGlobalContext()), 2, "iftmp");
+
+  	PN->addIncoming(ThenV, ThenBB);
+  	PN->addIncoming(ElseV, ElseBB);
+  	return PN;
 }
 
 llvm::Constant *LLVMGenerator::externalPrint()
