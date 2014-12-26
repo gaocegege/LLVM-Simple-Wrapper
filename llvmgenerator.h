@@ -56,6 +56,9 @@ namespace llvmgenerator
 		// array define
 		llvm::Value *array(const std::string &name);
 
+		// value get
+		llvm::Value *getValue(llvm::Value *name);
+
 		// expression
 		llvm::Value *expression(const char &op, const int &left, const int &right);
 		llvm::Value *expression(const char &op, const double &left, const double &right);

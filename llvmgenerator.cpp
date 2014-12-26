@@ -188,6 +188,11 @@ llvm::Value *LLVMGenerator::array(const std::string &name)
 	return newval;
 }
 
+llvm::Value *LLVMGenerator::getValue(llvm::Value *name)
+{
+	return builder.CreateLoad(name);
+}
+
 llvm::Value *LLVMGenerator::expression(const char &op, const int &left, const int &right)
 {
 //todo
@@ -270,17 +275,17 @@ llvm::Value *LLVMGenerator::expression(const char &op, llvm::Value *leftSide, ll
 	switch(op)
 	{
 		case '+':
-			result = builder.CreateFAdd(leftSide, rightSide, "addtmp");
+			result = builder.CreateAdd(leftSide, rightSide, "addtmp");
 			break;
 		case '-':
-			result = builder.CreateFSub(leftSide, rightSide, "subtmp");
+			result = builder.CreateSub(leftSide, rightSide, "subtmp");
 			break;
 		case '*':
-			result = builder.CreateFMul(leftSide, rightSide, "multmp");
+			result = builder.CreateMul(leftSide, rightSide, "multmp");
 			break;
 		case '/':
 			//signed int div~?
-			result = builder.CreateFDiv(leftSide, rightSide, "divtmp");
+			result = builder.CreateSDiv(leftSide, rightSide, "divtmp");
 			break;
 		//have bugs:double
 		case '<':

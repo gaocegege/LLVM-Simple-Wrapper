@@ -10,8 +10,8 @@ int main()
 	testClass.mainProto();
 	llvm::Value *val = testClass.identifier("gaoce");
 	llvm::Value *valarr = testClass.array("gaocegege");
-	testClass.callPrint(val);
-	testClass.ret(testClass.expression('/', 1, 2));
-	testClass.dump();
+	llvm::Value *buf = testClass.getValue(val);
+	testClass.callPrint(buf);
+	testClass.ret(testClass.expression('+', buf, buf));
 	testClass.run(testClass.getFuncName("main"));
 }
