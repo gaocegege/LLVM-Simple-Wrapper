@@ -169,20 +169,17 @@ llvm::Value* LLVMGenerator::identifier(const std::string &name)
 	return newval;
 }
 
-llvm::Value *LLVMGenerator::array(const std::string &name)
+llvm::Value *LLVMGenerator::array(const std::string &name, int size)
 {
 //todo
 	static llvm::Type * arraytype =NULL;
 	if(!arraytype){
-		std::vector<llvm::Type*>	members;
+		std::vector<llvm::Type*> members;
 
-		// members.push_back(llvm::Type::getInt8PtrTy(context));
+ 		for (int i = 0; i < size; i++)
+ 			members.push_back(llvm::Type::getInt32Ty(context));
 
- 		members.push_back(llvm::Type::getInt32Ty(context));
-		members.push_back(llvm::Type::getInt32Ty(context));
-		members.push_back(llvm::Type::getInt32Ty(context));
-
-		arraytype = llvm::StructType::create(members,"QBArray");
+		arraytype = llvm::StructType::create(members,"Array");
 	}
 	llvm::Value *newval = builder.CreateAlloca(arraytype ,0, name);
 	return newval;
