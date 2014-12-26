@@ -341,6 +341,27 @@ llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
 	return 0;
 }
 
+llvm::BasicBlock *LLVMGenerator::createBlock(const std::string &name, llvm::Function *func)
+{
+	llvm::BasicBlock* block = llvm::BasicBlock::Create(context, name, func);
+	return block;
+}
+
+void LLVMGenerator::setInsertBlock(llvm::BasicBlock *block)
+{
+	builder.SetInsertPoint(block);
+}
+
+llvm::Value *LLVMGenerator::unConditionJump(llvm::BasicBlock *block)
+{
+	return builder.CreateBr(block);
+}
+
+llvm::Value *LLVMGenerator::conditionJump(llvm::Value *cond, llvm::BasicBlock *trueBlock, llvm::BasicBlock *falseBlock)
+{
+	return builder.CreateCondBr(cond, trueBlock, falseBlock);
+}
+
 llvm::Constant *LLVMGenerator::externalPrint()
 {
 	std::vector<llvm::Type *> args;

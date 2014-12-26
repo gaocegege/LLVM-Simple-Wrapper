@@ -72,6 +72,14 @@ namespace llvmgenerator
 		// control flow
 		llvm::Value *ifStat(llvm::Value *cond);
 
+		// label
+		llvm::BasicBlock *createBlock(const std::string &name, llvm::Function *func);
+		void setInsertBlock(llvm::BasicBlock *block);// need to set the block to insert the code
+
+		// jump by label
+		llvm::Value *unConditionJump(llvm::BasicBlock *block);
+		llvm::Value *conditionJump(llvm::Value *cond, llvm::BasicBlock *trueBlock, llvm::BasicBlock *falseBlock);
+
 		// external function define
 		llvm::Constant *externalPrint();
 
