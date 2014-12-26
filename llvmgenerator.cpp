@@ -282,7 +282,7 @@ llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
 	llvm::Value *CondV = builder.CreateFCmpONE(cond,
                               llvm::ConstantFP::get(context, APFloat(0.0)),
                                 "ifcond");
-	Function *TheFunction = Builder.GetInsertBlock()->getParent();
+	Function *TheFunction = builder.GetInsertBlock()->getParent();
 
 	// Create blocks for the then and else cases.  Insert the 'then' block at the
 	// end of the function.
@@ -295,7 +295,7 @@ llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
 	builder.SetInsertPoint(ThenBB);
 
 	//generate then block
-	// llvm::Value *ThenV = Then->Codegen();
+	llvm::Value *ThenV = Then->Codegen();
 
   	builder.CreateBr(MergeBB);
   	// Codegen of 'Then' can change the current block, update ThenBB for the PHI.
@@ -306,7 +306,7 @@ llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
   	builder.SetInsertPoint(ElseBB);
 
   	//generate else block
-  	// Value *ElseV = Else->Codegen();
+  	Value *ElseV = Else->Codegen();
 
   	builder.CreateBr(MergeBB);
   	// Codegen of 'Else' can change the current block, update ElseBB for the PHI.
@@ -321,6 +321,36 @@ llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
   	PN->addIncoming(ThenV, ThenBB);
   	PN->addIncoming(ElseV, ElseBB);
   	return PN;
+}
+
+llvm::Value *LLVMGenerator::whileStat()
+{
+	Function *TheFunction = builder.GetInsertBlock()->getParent();
+	llvm::BasicBlock* cond_while =
+		llvm::BasicBlock::Create(context, "while", TheFunction);
+
+	llvm::BasicBlock* while_body =
+		llvm::BasicBlock::Create(context, "whileloop", TheFunction);
+
+	llvm::BasicBlock* cond_continue =
+		llvm::BasicBlock::Create(context, "whileend", TheFunction);
+
+	builder.CreateBr(cond_while);
+	builder.SetInsertPoint(cond_while);
+
+	llvm::Value * expcond = cond->codegen();
+	expcond = builder.CreateIntCast(expcond, llvm::Type::getInt1Ty(context);,true);
+	expcond = builder.CreateICmpEQ(expcond, llvm::ConstantInt::get(context,llvm::APInt(1,0,true)), "tmp");
+
+	builder.CreateCondBr(expcond, cond_continue, while_body);
+
+	while_body = body->codegen();
+	builder.SetInsertPoint(while_body);
+	builder.CreateBr(cond_while);
+
+	cond_continue->moveAfter(while_body);
+	
+	return cond_continue;
 }
 
 llvm::Constant *LLVMGenerator::externalPrint()

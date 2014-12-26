@@ -62,6 +62,7 @@ namespace llvmgenerator
 
 		// control flow
 		llvm::Value *ifStat(llvm::Value *cond);
+		llvm::Value *WhileStat();
 
 		// external function define
 		llvm::Constant *externalPrint();
