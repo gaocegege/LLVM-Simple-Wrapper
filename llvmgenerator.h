@@ -44,7 +44,7 @@ namespace llvmgenerator
 		// name->		function name
 		// arguments->	function arguments
 		// $return->	//todo	
-		llvm::Function *func(const std::string &name, const std::vector<std::string> &arguments);
+		llvm::Function *func(const std::string &name, const std::vector<std::string> &arguments, const std::string &returnType);
 		void retVoid();
 		void ret(llvm::Value *val);
 
@@ -57,6 +57,7 @@ namespace llvmgenerator
 		llvm::Value *doubleNum(const double &num);
 		llvm::Value *identifier(const std::string &name);
 		llvm::Value *array(const std::string &name, int size);
+		llvm::Value *array(const std::string &name, llvm::Value *size);
 
 		// value get
 		llvm::Value *getValue(llvm::Value *name);
@@ -99,7 +100,7 @@ namespace llvmgenerator
 		llvm::Value *Error(const char *Str){std::cout << "Err\n";return 0;}
 		
 		//func proto
-		llvm::Function *proto(const std::string &name, const std::vector<std::string> &arguments);
+		llvm::Function *proto(const std::string &name, const std::vector<std::string> &arguments, const std::string &returnType);
 	};
 }
 

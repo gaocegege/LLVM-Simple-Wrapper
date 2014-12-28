@@ -58,13 +58,18 @@ llvm::Value *LLVMGenerator::callPrint(llvm::Value *arg)
 	return builder.CreateCall(callee, v, "PRINT_via_printf");
 }
 
-llvm::Function *LLVMGenerator::proto(const std::string &name, const std::vector<std::string> &arguments)
+llvm::Function *LLVMGenerator::proto(const std::string &name, const std::vector<std::string> &arguments, const std::string &returnType)
 {
 	// only doubles now 
 	std::vector<llvm::Type *> Doubles(arguments.size(),
 	                         llvm::Type::getInt32Ty(context));
 	// the return type only supports double now
-		llvm::FunctionType *FT = llvm::FunctionType::get(llvm::Type::getInt32Ty(context),
+	llvm::FunctionType *FT;
+	if (returnType == "int")
+		FT = llvm::FunctionType::get(llvm::Type::getInt32Ty(context),
+	                                   Doubles, false);
+	else if (returnType == "void")
+		FT = llvm::FunctionType::get(llvm::Type::getVoidTy(context),
 	                                   Doubles, false);
 
 	llvm::Function *F = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, name, module);
@@ -102,9 +107,9 @@ llvm::Function *LLVMGenerator::proto(const std::string &name, const std::vector<
 	return F;
 }
 
-llvm::Function *LLVMGenerator::func(const std::string &name, const std::vector<std::string> &arguments)
+llvm::Function *LLVMGenerator::func(const std::string &name, const std::vector<std::string> &arguments, const std::string &returnType)
 {
-	llvm::Function *TheFunction = proto(name, arguments);
+	llvm::Function *TheFunction = proto(name, arguments, returnType);
   	if (TheFunction == 0)
     	return 0;
   
@@ -196,6 +201,13 @@ llvm::Value *LLVMGenerator::array(const std::string &name, int size)
 	// return newval;
 
 	llvm::Value *newval = builder.CreateAlloca(llvm::Type::getInt32Ty(context), integerNum(size), name);
+	nvt[name] = newval;
+	return newval;
+}
+
+llvm::Value *LLVMGenerator::array(const std::string &name, llvm::Value *size)
+{
+	llvm::Value *newval = builder.CreateAlloca(llvm::Type::getInt32Ty(context), size, name);
 	nvt[name] = newval;
 	return newval;
 }
