@@ -8,6 +8,8 @@ llvm::Module* LLVMGenerator::module = new llvm::Module("Our Code", LLVMGenerator
 
 llvm::IRBuilder<> LLVMGenerator::builder = llvm::IRBuilder<>(LLVMGenerator::context);
 
+std::map<std::string, llvm::Value*> LLVMGenerator::nvt = std::map<std::string, llvm::Value*>();
+
 LLVMGenerator::LLVMGenerator()
 {
 	externalPrint();
@@ -60,9 +62,9 @@ llvm::Function *LLVMGenerator::proto(const std::string &name, const std::vector<
 {
 	// only doubles now 
 	std::vector<llvm::Type *> Doubles(arguments.size(),
-	                         llvm::Type::getDoubleTy(context));
+	                         llvm::Type::getInt32Ty(context));
 	// the return type only supports double now
-		llvm::FunctionType *FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(context),
+		llvm::FunctionType *FT = llvm::FunctionType::get(llvm::Type::getInt32Ty(context),
 	                                   Doubles, false);
 
 	llvm::Function *F = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, name, module);
@@ -94,7 +96,7 @@ llvm::Function *LLVMGenerator::proto(const std::string &name, const std::vector<
 		AI->setName(arguments[Idx]);
 
 		// Add arguments to variable symbol table.
-		// NamedValues[arguments[Idx]] = AI;
+		nvt[arguments[Idx]] = AI;
 	}
 
 	return F;
@@ -166,6 +168,7 @@ llvm::Value* LLVMGenerator::identifier(const std::string &name)
 	// only support int now
 	llvm::Value *newval = builder.CreateAlloca(llvm::Type::getInt32Ty(context), 0, name);
 	// builder.CreateStore( llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(context)), newval);
+	nvt[name] = newval;
 	return newval;
 }
 
@@ -193,6 +196,7 @@ llvm::Value *LLVMGenerator::array(const std::string &name, int size)
 	// return newval;
 
 	llvm::Value *newval = builder.CreateAlloca(llvm::Type::getInt32Ty(context), integerNum(size), name);
+	nvt[name] = newval;
 	return newval;
 }
 
@@ -326,7 +330,12 @@ llvm::Value *LLVMGenerator::expression(const char &op, llvm::Value *leftSide, ll
 			break;
 		//have bugs:double
 		case '<':
-    		leftSide = builder.CreateFCmpULT(leftSide, rightSide, "cmptmp");
+    		leftSide = builder.CreateICmpULT(leftSide, rightSide, "cmptmp");
+    		// Convert bool 0/1 to double 0.0 or 1.0
+    		return builder.CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
+                                "booltmp");
+    	case '>':
+    		leftSide = builder.CreateICmpULT(rightSide, leftSide, "cmptmp");
     		// Convert bool 0/1 to double 0.0 or 1.0
     		return builder.CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
                                 "booltmp");
@@ -339,12 +348,12 @@ llvm::Value *LLVMGenerator::expression(const char &op, llvm::Value *leftSide, ll
 llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
 {
 	llvm::Value *CondV = builder.CreateFCmpONE(cond,
-                              llvm::ConstantFP::get(context, APFloat(0.0)),
+                              doubleNum(0),
                                 "ifcond");
-	Function *TheFunction = Builder.GetInsertBlock()->getParent();
+	llvm::Function *TheFunction = builder.GetInsertBlock()->getParent();
 
-	// Create blocks for the then and else cases.  Insert the 'then' block at the
-	// end of the function.
+	// // Create blocks for the then and else cases.  Insert the 'then' block at the
+	// // end of the function.
 	llvm::BasicBlock *ThenBB = llvm::BasicBlock::Create(context, "then", TheFunction);
 	llvm::BasicBlock *ElseBB = llvm::BasicBlock::Create(context, "else");
 	llvm::BasicBlock *MergeBB = llvm::BasicBlock::Create(context, "ifcont");
@@ -353,29 +362,38 @@ llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
 
 	builder.SetInsertPoint(ThenBB);
 
-	//generate then block
+	// //generate then block
 	// llvm::Value *ThenV = Then->Codegen();
+	std::vector<llvm::Value *> v;
+	llvm::Value *one = expression('-', nvt["n"], integerNum(1));
+	v.push_back(one);
+	llvm::Value *num = call("jiecheng", v);
+	llvm::Value *idnum = identifier("num");
+	setValue(idnum, num);
+	llvm::Value *ThenV = expression('*', getValue(idnum), nvt["n"]);
+	// llvm::Value *ThenV = integerNum(1);
 
   	builder.CreateBr(MergeBB);
-  	// Codegen of 'Then' can change the current block, update ThenBB for the PHI.
+ //  	// Codegen of 'Then' can change the current block, update ThenBB for the PHI.
   	ThenBB = builder.GetInsertBlock();
 
-  	// Emit else block.
+ //  	// Emit else block.
   	TheFunction->getBasicBlockList().push_back(ElseBB);
   	builder.SetInsertPoint(ElseBB);
 
-  	//generate else block
-  	// Value *ElseV = Else->Codegen();
+ //  	//generate else block
+ //  	// Value *ElseV = Else->Codegen();
+  	llvm::Value *ElseV = integerNum(1);
 
   	builder.CreateBr(MergeBB);
-  	// Codegen of 'Else' can change the current block, update ElseBB for the PHI.
+ //  	// Codegen of 'Else' can change the current block, update ElseBB for the PHI.
   	ElseBB = builder.GetInsertBlock();
 
-  	// Emit merge block.
+ //  	// Emit merge block.
   	TheFunction->getBasicBlockList().push_back(MergeBB);
   	builder.SetInsertPoint(MergeBB);
   	llvm::PHINode *PN =
-      builder.CreatePHI(Type::getDoubleTy(getGlobalContext()), 2, "iftmp");
+      builder.CreatePHI(llvm::Type::getInt32Ty(context), 2, "iftmp");
 
   	PN->addIncoming(ThenV, ThenBB);
   	PN->addIncoming(ElseV, ElseBB);
@@ -384,32 +402,32 @@ llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
 
 llvm::Value *LLVMGenerator::whileStat()
 {
-	Function *TheFunction = builder.GetInsertBlock()->getParent();
-	llvm::BasicBlock* cond_while =
-		llvm::BasicBlock::Create(context, "while", TheFunction);
+	// Function *TheFunction = builder.GetInsertBlock()->getParent();
+	// llvm::BasicBlock* cond_while =
+	// 	llvm::BasicBlock::Create(context, "while", TheFunction);
 
-	llvm::BasicBlock* while_body =
-		llvm::BasicBlock::Create(context, "whileloop", TheFunction);
+	// llvm::BasicBlock* while_body =
+	// 	llvm::BasicBlock::Create(context, "whileloop", TheFunction);
 
-	llvm::BasicBlock* cond_continue =
-		llvm::BasicBlock::Create(context, "whileend", TheFunction);
+	// llvm::BasicBlock* cond_continue =
+	// 	llvm::BasicBlock::Create(context, "whileend", TheFunction);
 
-	builder.CreateBr(cond_while);
-	builder.SetInsertPoint(cond_while);
+	// builder.CreateBr(cond_while);
+	// builder.SetInsertPoint(cond_while);
 
-	llvm::Value * expcond = cond->codegen();
-	expcond = builder.CreateIntCast(expcond, llvm::Type::getInt1Ty(context);,true);
-	expcond = builder.CreateICmpEQ(expcond, llvm::ConstantInt::get(context,llvm::APInt(1,0,true)), "tmp");
+	// llvm::Value * expcond = cond->codegen();
+	// expcond = builder.CreateIntCast(expcond, llvm::Type::getInt1Ty(context);,true);
+	// expcond = builder.CreateICmpEQ(expcond, llvm::ConstantInt::get(context,llvm::APInt(1,0,true)), "tmp");
 
-	builder.CreateCondBr(expcond, cond_continue, while_body);
+	// builder.CreateCondBr(expcond, cond_continue, while_body);
 
-	while_body = body->codegen();
-	builder.SetInsertPoint(while_body);
-	builder.CreateBr(cond_while);
+	// while_body = body->codegen();
+	// builder.SetInsertPoint(while_body);
+	// builder.CreateBr(cond_while);
 
-	cond_continue->moveAfter(while_body);
+	// cond_continue->moveAfter(while_body);
 	
-	return cond_continue;
+	// return cond_continue;
 }
 
 llvm::BasicBlock *LLVMGenerator::createBlock(const std::string &name, llvm::Function *func)

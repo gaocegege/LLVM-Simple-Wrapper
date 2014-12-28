@@ -27,6 +27,10 @@ namespace llvmgenerator
 	public:
 		LLVMGenerator();
 		~LLVMGenerator();
+		static llvm::LLVMContext &context;
+		static llvm::Module *module;
+		static llvm::IRBuilder<> builder;
+		static std::map<std::string, llvm::Value*> nvt;
 
 		// main block
 		void mainProto();
@@ -92,9 +96,6 @@ namespace llvmgenerator
 		void run(llvm::Function *F);
 
 	private:
-		static llvm::LLVMContext &context;
-		static llvm::Module *module;
-		static llvm::IRBuilder<> builder;
 		llvm::Value *Error(const char *Str){std::cout << "Err\n";return 0;}
 		
 		//func proto
