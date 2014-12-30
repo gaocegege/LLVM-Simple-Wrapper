@@ -21,6 +21,6 @@ int main()
 	testClass.callPrint(testClass.getArrayValue(valarr, 1));
 	testClass.callPrint(testClass.getValue(val));
 
-	testClass.ret(testClass.expression('+', testClass.getValue(val), testClass.getValue(val)));
+	testClass.ret(testClass.expression('+', val, testClass.getValue(val)));
 	testClass.run(testClass.getFuncName("main"));
 }

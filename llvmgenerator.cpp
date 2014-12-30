@@ -60,10 +60,10 @@ llvm::Value *LLVMGenerator::callPrint(llvm::Value *arg)
 
 llvm::Function *LLVMGenerator::proto(const std::string &name, const std::vector<std::string> &arguments, const std::string &returnType)
 {
-	// only doubles now 
+	// only integers now 
 	std::vector<llvm::Type *> Doubles(arguments.size(),
 	                         llvm::Type::getInt32Ty(context));
-	// the return type only supports double now
+	// array: getInt32PtrTy
 	llvm::FunctionType *FT;
 	if (returnType == "int")
 		FT = llvm::FunctionType::get(llvm::Type::getInt32Ty(context),

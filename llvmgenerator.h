@@ -30,7 +30,7 @@ namespace llvmgenerator
 		static llvm::LLVMContext &context;
 		static llvm::Module *module;
 		static llvm::IRBuilder<> builder;
-		static std::map<std::string, llvm::Value*> nvt;
+		static std::map<std::string, llvm::Value *> nvt;
 
 		// main block
 		void mainProto();
