@@ -38,7 +38,7 @@ namespace llvmgenerator
 		// callee->		function name
 		// arguments->	function arguments
 		// $return->	//todo
-		llvm::Value *call(const std::string &callee, const std::vector<llvm::Value *> &arguments);
+		llvm::Value *call(llvm::Function *callee, const std::vector<llvm::Value *> &arguments);
 		llvm::Value *callPrint(llvm::Value *arg);
 
 		// name->		function name

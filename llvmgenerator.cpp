@@ -34,16 +34,14 @@ void LLVMGenerator::mainProto()
 
 }
 
-llvm::Value* LLVMGenerator::call(const std::string &callee, const std::vector<llvm::Value *> &arguments)
+llvm::Value* LLVMGenerator::call(llvm::Function *CalleeF, const std::vector<llvm::Value *> &arguments)
 {
-//todo
-	llvm::Function *CalleeF = module->getFunction(callee);
-	if (CalleeF == 0)
-		return Error("Unknown function referenced");
+	// change from string to Function type
+	// llvm::Function *CalleeF = module->getFunction(callee);
 
-		// If argument mismatch Error.
-		if (CalleeF->arg_size() != arguments.size())
-		return Error("Incorrect # arguments passed");
+	// If argument mismatch Error.
+	if (CalleeF->arg_size() != arguments.size())
+	return Error("Incorrect # arguments passed");
 
 	return builder.CreateCall(CalleeF, arguments, "calltmp");
 }
@@ -379,7 +377,7 @@ llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
 	std::vector<llvm::Value *> v;
 	llvm::Value *one = expression('-', nvt["n"], integerNum(1));
 	v.push_back(one);
-	llvm::Value *num = call("jiecheng", v);
+	llvm::Value *num = call(module->getFunction("jiecheng"), v);
 	llvm::Value *idnum = identifier("num");
 	setValue(idnum, num);
 	llvm::Value *ThenV = expression('*', getValue(idnum), nvt["n"]);

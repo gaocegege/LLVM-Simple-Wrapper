@@ -14,7 +14,7 @@ int main(int argc, char const *argv[])
 	testCase.mainProto();
 	std::vector<llvm::Value *> arg;
 	arg.push_back(testCase.integerNum(4));
-	testCase.ret(testCase.call("jiecheng", arg));
+	testCase.ret(testCase.call(func, arg));
 
 	testCase.dump();
 	testCase.run(testCase.getFuncName("main"));
