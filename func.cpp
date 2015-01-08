@@ -7,9 +7,9 @@ int main(int argc, char const *argv[])
 	std::vector<std::string> v;
 	v.push_back("n");
 	llvm::Function *func = testCase.func("jiecheng", v, "int");
-	std::cout << llvmgenerator::LLVMGenerator::nvt["n"] << "\n";
-	llvm::Value *cond = testCase.expression('>', llvmgenerator::LLVMGenerator::nvt["n"], testCase.integerNum(1));
-	// testCase.ret(llvmgenerator::LLVMGenerator::nvt["n"]);
+	std::cout << testCase.nvt["n"] << "\n";
+	llvm::Value *cond = testCase.expression('>', testCase.nvt["n"], testCase.integerNum(1));
+	// testCase.ret(testCase.nvt["n"]);
 	testCase.ret(testCase.ifStat(cond));
 	testCase.mainProto();
 	std::vector<llvm::Value *> arg;

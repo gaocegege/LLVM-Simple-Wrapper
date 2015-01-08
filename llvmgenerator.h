@@ -25,10 +25,10 @@ namespace llvmgenerator
 	public:
 		LLVMGenerator();
 		~LLVMGenerator();
-		static llvm::LLVMContext &context;
-		static llvm::Module *module;
-		static llvm::IRBuilderDefault *builder;
-		static std::map<std::string, llvm::Value *> nvt;
+		llvm::LLVMContext &context;
+		llvm::Module *module;
+		llvm::IRBuilderDefault *builder;
+		std::map<std::string, llvm::Value *> nvt;
 
 		// main block
 		void mainProto();

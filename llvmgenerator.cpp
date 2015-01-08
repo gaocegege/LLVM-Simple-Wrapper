@@ -25,16 +25,13 @@ namespace llvm
 
 using namespace llvmgenerator;
 
-llvm::LLVMContext& LLVMGenerator::context = llvm::getGlobalContext();
-
-llvm::Module* LLVMGenerator::module = new llvm::Module("Our Code", LLVMGenerator::context);
-
-llvm::IRBuilderDefault* LLVMGenerator::builder = new llvm::IRBuilderDefault(LLVMGenerator::context);
-
-std::map<std::string, llvm::Value*> LLVMGenerator::nvt = std::map<std::string, llvm::Value*>();
-
 LLVMGenerator::LLVMGenerator()
+	:context(llvm::getGlobalContext())
 {
+	module = new llvm::Module("Our Code", context);
+	builder = new llvm::IRBuilderDefault(context);
+	nvt = std::map<std::string, llvm::Value*>();
+
 	externalPrint();
 }
 
