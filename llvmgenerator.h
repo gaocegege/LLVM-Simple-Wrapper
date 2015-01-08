@@ -1,23 +1,21 @@
 #ifndef LLVMGENERATOR_HPP
 #define LLVMGENERATOR_HPP
 
-#include <llvm/Support/TargetSelect.h>  
-#include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-// #include "llvm/ExecutionEngine/MCJIT.h"
-#include <llvm/ExecutionEngine/SectionMemoryManager.h>
-#include <llvm/IR/DataLayout.h>
-#include <llvm/IR/DerivedTypes.h>
-#include <llvm/IR/IRBuilder.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Verifier.h>
-#include <llvm/PassManager.h>
-#include <llvm/Transforms/Scalar.h>
 #include <iostream>
 
 
 #include "../semantic/block_common.hpp"
+
+namespace llvm
+{
+	class Value;
+	class Function;
+	class Module;
+	class BasicBlock;
+	class IRBuilderDefault;
+	class LLVMContext;
+	class Constant;
+}
 
 namespace llvmgenerator
 {
@@ -29,7 +27,7 @@ namespace llvmgenerator
 		~LLVMGenerator();
 		static llvm::LLVMContext &context;
 		static llvm::Module *module;
-		static llvm::IRBuilder<> builder;
+		static llvm::IRBuilderDefault *builder;
 		static std::map<std::string, llvm::Value *> nvt;
 
 		// main block

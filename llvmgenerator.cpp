@@ -1,12 +1,36 @@
 #include "llvmgenerator.h"
 
+#include <llvm/Support/TargetSelect.h>  
+#include <llvm/ExecutionEngine/JIT.h>
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+// #include "llvm/ExecutionEngine/MCJIT.h"
+#include <llvm/ExecutionEngine/SectionMemoryManager.h>
+#include <llvm/IR/DataLayout.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/IRbuilder.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Verifier.h>
+#include <llvm/PassManager.h>
+#include <llvm/Transforms/Scalar.h>
+
+namespace llvm
+{
+	class IRBuilderDefault: public IRBuilder<>
+	{
+	public:
+		using llvm::IRBuilder<>::IRBuilder;
+		
+	};
+}
+
 using namespace llvmgenerator;
 
 llvm::LLVMContext& LLVMGenerator::context = llvm::getGlobalContext();
 
 llvm::Module* LLVMGenerator::module = new llvm::Module("Our Code", LLVMGenerator::context);
 
-llvm::IRBuilder<> LLVMGenerator::builder = llvm::IRBuilder<>(LLVMGenerator::context);
+llvm::IRBuilderDefault* LLVMGenerator::builder = new llvm::IRBuilderDefault(LLVMGenerator::context);
 
 std::map<std::string, llvm::Value*> LLVMGenerator::nvt = std::map<std::string, llvm::Value*>();
 
@@ -30,7 +54,7 @@ void LLVMGenerator::mainProto()
 
     // set the main as a entry
     llvm::BasicBlock *entry = llvm::BasicBlock::Create(context, "entrypoint", mainFunc);
-  	builder.SetInsertPoint(entry);
+  	builder->SetInsertPoint(entry);
 
 }
 
@@ -43,7 +67,7 @@ llvm::Value* LLVMGenerator::call(llvm::Function *CalleeF, const std::vector<llvm
 	if (CalleeF->arg_size() != arguments.size())
 	return Error("Incorrect # arguments passed");
 
-	return builder.CreateCall(CalleeF, arguments, "calltmp");
+	return builder->CreateCall(CalleeF, arguments, "calltmp");
 }
 
 llvm::Value *LLVMGenerator::callPrint(llvm::Value *arg)
@@ -51,9 +75,9 @@ llvm::Value *LLVMGenerator::callPrint(llvm::Value *arg)
 	llvm::Value *callee = externalPrint();
 	std::vector<llvm::Value *> v;
 	v.push_back(arg);
-	v.insert(v.begin(), builder.CreateGlobalStringPtr("output: %d\t\n"));
+	v.insert(v.begin(), builder->CreateGlobalStringPtr("output: %d\t\n"));
 	std::cout << v[0] << std::endl;
-	return builder.CreateCall(callee, v, "PRINT_via_printf");
+	return builder->CreateCall(callee, v, "PRINT_via_printf");
 }
 
 llvm::Function *LLVMGenerator::proto(const std::string &name, const std::vector<std::string> &arguments, const std::string &returnType)
@@ -113,13 +137,13 @@ llvm::Function *LLVMGenerator::func(const std::string &name, const std::vector<s
   
   	// Create a new basic block to start insertion into.
   	llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry", TheFunction);
-  	builder.SetInsertPoint(BB);
+  	builder->SetInsertPoint(BB);
 
  //  	// generate the body code
 	// if (Value *RetVal = Body->Codegen()) 
 	// {
 	// 	// Finish off the function.
-	// 	builder.CreateRet(RetVal);
+	// 	builder->CreateRet(RetVal);
 
 	// // Validate the generated code, checking for consistency.
 	// verifyFunction(*TheFunction);
@@ -136,12 +160,12 @@ llvm::Function *LLVMGenerator::func(const std::string &name, const std::vector<s
 void LLVMGenerator::retVoid()
 {
 	//todo
-	builder.CreateRetVoid();
+	builder->CreateRetVoid();
 }
 
 void LLVMGenerator::ret(llvm::Value *val)
 {
-	builder.CreateRet(val);
+	builder->CreateRet(val);
 }
 
 void LLVMGenerator::classDef()
@@ -151,7 +175,7 @@ void LLVMGenerator::classDef()
 
 llvm::Value *LLVMGenerator::globalString(const std::string &num)
 {
-	return builder.CreateGlobalStringPtr(num);
+	return builder->CreateGlobalStringPtr(num);
 }
 
 llvm::Value* LLVMGenerator::integerNum(const int &num)
@@ -169,8 +193,8 @@ llvm::Value* LLVMGenerator::identifier(const std::string &name)
 {
 	// bug
 	// only support int now
-	llvm::Value *newval = builder.CreateAlloca(llvm::Type::getInt32Ty(context), 0, name);
-	// builder.CreateStore( llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(context)), newval);
+	llvm::Value *newval = builder->CreateAlloca(llvm::Type::getInt32Ty(context), 0, name);
+	// builder->CreateStore( llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(context)), newval);
 	nvt[name] = newval;
 	return newval;
 }
@@ -187,61 +211,61 @@ llvm::Value *LLVMGenerator::array(const std::string &name, int size)
 
 	// 	arraytype = llvm::StructType::create(members,"Array");
 	// }
-	// llvm::Value *newval = builder.CreateAlloca(arraytype ,0, name);
+	// llvm::Value *newval = builder->CreateAlloca(arraytype ,0, name);
 
 	// std::vector<llvm::Type *> args;
-	// args.push_back(builder.getInt8PtrTy());
-	// args.push_back(builder.getInt32Ty());
+	// args.push_back(builder->getInt8PtrTy());
+	// args.push_back(builder->getInt32Ty());
 
 	// llvm::Constant *func = module->getOrInsertFunction("btr_qbarray_new",
-	// 		llvm::FunctionType::get(builder.getVoidTy(), args, false));
-	// builder.CreateCall2(func, newval, integerNum(size));
+	// 		llvm::FunctionType::get(builder->getVoidTy(), args, false));
+	// builder->CreateCall2(func, newval, integerNum(size));
 	// return newval;
 
-	llvm::Value *newval = builder.CreateAlloca(llvm::Type::getInt32Ty(context), integerNum(size), name);
+	llvm::Value *newval = builder->CreateAlloca(llvm::Type::getInt32Ty(context), integerNum(size), name);
 	nvt[name] = newval;
 	return newval;
 }
 
 llvm::Value *LLVMGenerator::array(const std::string &name, llvm::Value *size)
 {
-	llvm::Value *newval = builder.CreateAlloca(llvm::Type::getInt32Ty(context), size, name);
+	llvm::Value *newval = builder->CreateAlloca(llvm::Type::getInt32Ty(context), size, name);
 	nvt[name] = newval;
 	return newval;
 }
 
 llvm::Value *LLVMGenerator::getValue(llvm::Value *name)
 {
-	return builder.CreateLoad(name);
+	return builder->CreateLoad(name);
 }
 
 llvm::Value *LLVMGenerator::getArrayValue(llvm::Value *name, int index)
 {
-	llvm::Value *result = builder.CreateGEP(name, integerNum(index));
-	return builder.CreateLoad(result);
+	llvm::Value *result = builder->CreateGEP(name, integerNum(index));
+	return builder->CreateLoad(result);
 }
 
 llvm::Value *LLVMGenerator::getArrayValue(llvm::Value *name, llvm::Value *index)
 {
-	llvm::Value *result = builder.CreateGEP(name, index);
-	return builder.CreateLoad(result);
+	llvm::Value *result = builder->CreateGEP(name, index);
+	return builder->CreateLoad(result);
 }
 
 llvm::Value *LLVMGenerator::setValue(llvm::Value *name, llvm::Value *value)
 {
-	return builder.CreateStore(value, name);
+	return builder->CreateStore(value, name);
 }
 
 llvm::Value *LLVMGenerator::setArrayValue(llvm::Value *name, llvm::Value *value, int index)
 {
-	llvm::Value *pos = builder.CreateGEP(name, integerNum(index));
-	return builder.CreateStore(value, pos);
+	llvm::Value *pos = builder->CreateGEP(name, integerNum(index));
+	return builder->CreateStore(value, pos);
 }
 
 llvm::Value *LLVMGenerator::setArrayValue(llvm::Value *name, llvm::Value *value, llvm::Value *index)
 {
-	llvm::Value *pos = builder.CreateGEP(name, index);
-	return builder.CreateStore(value, pos);
+	llvm::Value *pos = builder->CreateGEP(name, index);
+	return builder->CreateStore(value, pos);
 }
 
 llvm::Value *LLVMGenerator::expression(const char &op, const int &left, const int &right)
@@ -255,26 +279,26 @@ llvm::Value *LLVMGenerator::expression(const char &op, const int &left, const in
 	{
 		case '+':
 			std::cout << left + right << std::endl;
-			result = builder.CreateAdd(leftSide, rightSide, "addtmp");
+			result = builder->CreateAdd(leftSide, rightSide, "addtmp");
 			break;
 		case '-':
 			std::cout << left - right << std::endl;
-			result = builder.CreateSub(leftSide, rightSide, "subtmp");
+			result = builder->CreateSub(leftSide, rightSide, "subtmp");
 			break;
 		case '*':
 			std::cout << left * right << std::endl;
-			result = builder.CreateMul(leftSide, rightSide, "multmp");
+			result = builder->CreateMul(leftSide, rightSide, "multmp");
 			break;
 		case '/':
 			std::cout << left / right << std::endl;
 			//signed int div~?
-			result = builder.CreateSDiv(leftSide, rightSide, "divtmp");
+			result = builder->CreateSDiv(leftSide, rightSide, "divtmp");
 			break;
 		//have bugs:double
 		case '<':
-    		leftSide = builder.CreateFCmpULT(leftSide, rightSide, "cmptmp");
+    		leftSide = builder->CreateFCmpULT(leftSide, rightSide, "cmptmp");
     		// Convert bool 0/1 to double 0.0 or 1.0
-    		return builder.CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
+    		return builder->CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
                                 "booltmp");
 		default:
 			return 0;
@@ -293,26 +317,26 @@ llvm::Value *LLVMGenerator::expression(const char &op, const double &left, const
 	{
 		case '+':
 			std::cout << left + right << std::endl;
-			result = builder.CreateFAdd(leftSide, rightSide, "addtmp");
+			result = builder->CreateFAdd(leftSide, rightSide, "addtmp");
 			break;
 		case '-':
 			std::cout << left - right << std::endl;
-			result = builder.CreateFSub(leftSide, rightSide, "subtmp");
+			result = builder->CreateFSub(leftSide, rightSide, "subtmp");
 			break;
 		case '*':
 			std::cout << left * right << std::endl;
-			result = builder.CreateFMul(leftSide, rightSide, "multmp");
+			result = builder->CreateFMul(leftSide, rightSide, "multmp");
 			break;
 		case '/':
 			std::cout << left / right << std::endl;
 			//signed int div~?
-			result = builder.CreateFDiv(leftSide, rightSide, "divtmp");
+			result = builder->CreateFDiv(leftSide, rightSide, "divtmp");
 			break;
 		//have bugs:double
 		case '<':
-    		leftSide = builder.CreateFCmpULT(leftSide, rightSide, "cmptmp");
+    		leftSide = builder->CreateFCmpULT(leftSide, rightSide, "cmptmp");
     		// Convert bool 0/1 to double 0.0 or 1.0
-    		return builder.CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
+    		return builder->CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
                                 "booltmp");
 		default:
 			return 0;
@@ -326,28 +350,28 @@ llvm::Value *LLVMGenerator::expression(const char &op, llvm::Value *leftSide, ll
 	switch(op)
 	{
 		case '+':
-			result = builder.CreateAdd(leftSide, rightSide, "addtmp");
+			result = builder->CreateAdd(leftSide, rightSide, "addtmp");
 			break;
 		case '-':
-			result = builder.CreateSub(leftSide, rightSide, "subtmp");
+			result = builder->CreateSub(leftSide, rightSide, "subtmp");
 			break;
 		case '*':
-			result = builder.CreateMul(leftSide, rightSide, "multmp");
+			result = builder->CreateMul(leftSide, rightSide, "multmp");
 			break;
 		case '/':
 			//signed int div~?
-			result = builder.CreateSDiv(leftSide, rightSide, "divtmp");
+			result = builder->CreateSDiv(leftSide, rightSide, "divtmp");
 			break;
 		//have bugs:double
 		case '<':
-    		leftSide = builder.CreateICmpULT(leftSide, rightSide, "cmptmp");
+    		leftSide = builder->CreateICmpULT(leftSide, rightSide, "cmptmp");
     		// Convert bool 0/1 to double 0.0 or 1.0
-    		return builder.CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
+    		return builder->CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
                                 "booltmp");
     	case '>':
-    		leftSide = builder.CreateICmpULT(rightSide, leftSide, "cmptmp");
+    		leftSide = builder->CreateICmpULT(rightSide, leftSide, "cmptmp");
     		// Convert bool 0/1 to double 0.0 or 1.0
-    		return builder.CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
+    		return builder->CreateUIToFP(leftSide, llvm::Type::getDoubleTy(context),
                                 "booltmp");
 		default:
 			return 0;
@@ -357,10 +381,10 @@ llvm::Value *LLVMGenerator::expression(const char &op, llvm::Value *leftSide, ll
 
 llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
 {
-	llvm::Value *CondV = builder.CreateFCmpONE(cond,
+	llvm::Value *CondV = builder->CreateFCmpONE(cond,
                               doubleNum(0),
                                 "ifcond");
-	llvm::Function *TheFunction = builder.GetInsertBlock()->getParent();
+	llvm::Function *TheFunction = builder->GetInsertBlock()->getParent();
 
 	// // Create blocks for the then and else cases.  Insert the 'then' block at the
 	// // end of the function.
@@ -368,9 +392,9 @@ llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
 	llvm::BasicBlock *ElseBB = llvm::BasicBlock::Create(context, "else");
 	llvm::BasicBlock *MergeBB = llvm::BasicBlock::Create(context, "ifcont");
 
-	builder.CreateCondBr(CondV, ThenBB, ElseBB);
+	builder->CreateCondBr(CondV, ThenBB, ElseBB);
 
-	builder.SetInsertPoint(ThenBB);
+	builder->SetInsertPoint(ThenBB);
 
 	// //generate then block
 	// llvm::Value *ThenV = Then->Codegen();
@@ -383,27 +407,27 @@ llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
 	llvm::Value *ThenV = expression('*', getValue(idnum), nvt["n"]);
 	// llvm::Value *ThenV = integerNum(1);
 
-  	builder.CreateBr(MergeBB);
+  	builder->CreateBr(MergeBB);
  //  	// Codegen of 'Then' can change the current block, update ThenBB for the PHI.
-  	ThenBB = builder.GetInsertBlock();
+  	ThenBB = builder->GetInsertBlock();
 
  //  	// Emit else block.
   	TheFunction->getBasicBlockList().push_back(ElseBB);
-  	builder.SetInsertPoint(ElseBB);
+  	builder->SetInsertPoint(ElseBB);
 
  //  	//generate else block
  //  	// Value *ElseV = Else->Codegen();
   	llvm::Value *ElseV = integerNum(1);
 
-  	builder.CreateBr(MergeBB);
+  	builder->CreateBr(MergeBB);
  //  	// Codegen of 'Else' can change the current block, update ElseBB for the PHI.
-  	ElseBB = builder.GetInsertBlock();
+  	ElseBB = builder->GetInsertBlock();
 
  //  	// Emit merge block.
   	TheFunction->getBasicBlockList().push_back(MergeBB);
-  	builder.SetInsertPoint(MergeBB);
+  	builder->SetInsertPoint(MergeBB);
   	llvm::PHINode *PN =
-      builder.CreatePHI(llvm::Type::getInt32Ty(context), 2, "iftmp");
+      builder->CreatePHI(llvm::Type::getInt32Ty(context), 2, "iftmp");
 
   	PN->addIncoming(ThenV, ThenBB);
   	PN->addIncoming(ElseV, ElseBB);
@@ -412,7 +436,7 @@ llvm::Value *LLVMGenerator::ifStat(llvm::Value *cond)
 
 llvm::Value *LLVMGenerator::whileStat()
 {
-	// Function *TheFunction = builder.GetInsertBlock()->getParent();
+	// Function *TheFunction = builder->GetInsertBlock()->getParent();
 	// llvm::BasicBlock* cond_while =
 	// 	llvm::BasicBlock::Create(context, "while", TheFunction);
 
@@ -422,18 +446,18 @@ llvm::Value *LLVMGenerator::whileStat()
 	// llvm::BasicBlock* cond_continue =
 	// 	llvm::BasicBlock::Create(context, "whileend", TheFunction);
 
-	// builder.CreateBr(cond_while);
-	// builder.SetInsertPoint(cond_while);
+	// builder->CreateBr(cond_while);
+	// builder->SetInsertPoint(cond_while);
 
 	// llvm::Value * expcond = cond->codegen();
-	// expcond = builder.CreateIntCast(expcond, llvm::Type::getInt1Ty(context);,true);
-	// expcond = builder.CreateICmpEQ(expcond, llvm::ConstantInt::get(context,llvm::APInt(1,0,true)), "tmp");
+	// expcond = builder->CreateIntCast(expcond, llvm::Type::getInt1Ty(context);,true);
+	// expcond = builder->CreateICmpEQ(expcond, llvm::ConstantInt::get(context,llvm::APInt(1,0,true)), "tmp");
 
-	// builder.CreateCondBr(expcond, cond_continue, while_body);
+	// builder->CreateCondBr(expcond, cond_continue, while_body);
 
 	// while_body = body->codegen();
-	// builder.SetInsertPoint(while_body);
-	// builder.CreateBr(cond_while);
+	// builder->SetInsertPoint(while_body);
+	// builder->CreateBr(cond_while);
 
 	// cond_continue->moveAfter(while_body);
 	
@@ -448,26 +472,26 @@ llvm::BasicBlock *LLVMGenerator::createBlock(const std::string &name, llvm::Func
 
 void LLVMGenerator::setInsertBlock(llvm::BasicBlock *block)
 {
-	builder.SetInsertPoint(block);
+	builder->SetInsertPoint(block);
 }
 
 llvm::Value *LLVMGenerator::unConditionJump(llvm::BasicBlock *block)
 {
-	return builder.CreateBr(block);
+	return builder->CreateBr(block);
 }
 
 llvm::Value *LLVMGenerator::conditionJump(llvm::Value *cond, llvm::BasicBlock *trueBlock, llvm::BasicBlock *falseBlock)
 {
-	return builder.CreateCondBr(cond, trueBlock, falseBlock);
+	return builder->CreateCondBr(cond, trueBlock, falseBlock);
 }
 
 llvm::Constant *LLVMGenerator::externalPrint()
 {
 	std::vector<llvm::Type *> args;
-	args.push_back(builder.getInt8PtrTy());
+	args.push_back(builder->getInt8PtrTy());
 
 	llvm::Constant *printf_func = module->getOrInsertFunction("printf",
-										llvm::FunctionType::get(builder.getInt32Ty(), args,
+										llvm::FunctionType::get(builder->getInt32Ty(), args,
 		/*must be true to get other params*/true));
 
 	return printf_func;
