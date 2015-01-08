@@ -10,7 +10,6 @@
 #include <llvm/IR/IRbuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
-#include <llvm/IR/Verifier.h>
 #include <llvm/PassManager.h>
 #include <llvm/Transforms/Scalar.h>
 
@@ -517,7 +516,7 @@ void LLVMGenerator::run(llvm::Function *F)
         exit(EINVAL);  
     }
 	std::cout << "Run...\n";
-	llvm::verifyFunction(*F);
+	// llvm::verifyFunction(*F);
 	F->dump();
 	void *FPtr = executeEngine->getPointerToFunction(F);
 	std::cout << "Get The Pointer...\n";

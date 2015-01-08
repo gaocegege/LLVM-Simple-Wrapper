@@ -2,9 +2,9 @@
 #define LLVMGENERATOR_HPP
 
 #include <iostream>
-
-
-#include "../semantic/block_common.hpp"
+#include <vector>
+#include <map>
+#include <string>
 
 namespace llvm
 {
