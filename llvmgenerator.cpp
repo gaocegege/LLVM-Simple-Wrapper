@@ -29,7 +29,6 @@ LLVMGenerator::LLVMGenerator()
 {
     module = new llvm::Module("Our Code", context);
     builder = new llvm::IRBuilderDefault(context);
-    nvt = std::map<std::string, llvm::Value*>();
 
     externalPrint();
 }
@@ -38,10 +37,10 @@ LLVMGenerator::~LLVMGenerator()
 {
     delete module;
     delete builder;
-    for (auto iter = nvt.begin(); iter != nvt.end(); ++iter)
-    {
-        delete iter->second;
-    }
+    // for (auto iter = nvt.begin(); iter != nvt.end(); ++iter)
+    // {
+    //     if (iter->second) delete iter->second;
+    // }
 }
 
 void LLVMGenerator::mainProto()
