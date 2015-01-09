@@ -36,7 +36,12 @@ LLVMGenerator::LLVMGenerator()
 
 LLVMGenerator::~LLVMGenerator()
 {
-
+    delete module;
+    delete builder;
+    for (auto iter = nvt.begin(); iter != nvt.end(); ++iter)
+    {
+        delete iter->second;
+    }
 }
 
 void LLVMGenerator::mainProto()

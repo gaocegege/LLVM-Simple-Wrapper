@@ -103,6 +103,11 @@ namespace llvmgenerator
         // func proto
         llvm::Function *proto(const std::string &name, const std::vector<std::string> &arguments, const std::string &returnType);
     };
+
+    inline LLVMGenerator &instance() {
+        static LLVMGenerator lg;
+        return lg;
+    }
 }
 
 #endif
