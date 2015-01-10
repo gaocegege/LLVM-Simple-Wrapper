@@ -185,7 +185,7 @@ llvm::Value *LLVMGenerator::globalVariable(const std::string &name)
 // /*Linkage=*/GlobalValue::CommonLinkage,
 // /*Initializer=*/0, // has initializer, specified below
 // name);
-	module->getOrInsertGlobal(name, llvm::ArrayType::get(llvm::Type::getInt32Ty(context), 100));
+	return module->getOrInsertGlobal(name, llvm::ArrayType::get(llvm::Type::getInt32Ty(context), 100));
 }
 
 llvm::Value* LLVMGenerator::integerNum(const int &num)
@@ -205,6 +205,22 @@ llvm::Value* LLVMGenerator::identifier(const std::string &name)
     // only support int now
     llvm::Value *newval = builder->CreateAlloca(llvm::Type::getInt32Ty(context), 0, name);
     // builder->CreateStore( llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(context)), newval);
+    nvt[name] = newval;
+    return newval;
+}
+
+llvm::Value *LLVMGenerator::identifier1(const std::string &name, int size) {
+    llvm::Value *newval = builder->CreateAlloca(
+        llvm::Type::getInt32Ty(context), size ? integerNum(size) : nullptr, name
+    );
+    nvt[name] = newval;
+    return newval;
+}
+
+llvm::Value *LLVMGenerator::globalIdentifier1(const std::string &name, int size) {
+    llvm::Value *newval = module->getOrInsertGlobal(
+        name, llvm::ArrayType::get(llvm::Type::getInt32Ty(context), size)
+    );
     nvt[name] = newval;
     return newval;
 }
