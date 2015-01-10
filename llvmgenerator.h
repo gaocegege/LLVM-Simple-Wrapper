@@ -51,6 +51,7 @@ namespace llvmgenerator
 
         // var define
         llvm::Value *globalString(const std::string &num);
+        llvm::Value *globalVariable(const std::string &name);
         llvm::Value *integerNum(const int &num);
         llvm::Value *doubleNum(const double &num);
         llvm::Value *identifier(const std::string &name);

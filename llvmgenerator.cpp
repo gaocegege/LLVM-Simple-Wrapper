@@ -177,6 +177,17 @@ llvm::Value *LLVMGenerator::globalString(const std::string &num)
     return builder->CreateGlobalStringPtr(num);
 }
 
+llvm::Value *LLVMGenerator::globalVariable(const std::string &name)
+{
+// 	llvm::GlobalVariable* gvar_ptr_abc = new llvm::GlobalVariable(module, 
+// /*Type=*/,
+// /*isConstant=*/false,
+// /*Linkage=*/GlobalValue::CommonLinkage,
+// /*Initializer=*/0, // has initializer, specified below
+// name);
+	module->getOrInsertGlobal(name, llvm::ArrayType::get(llvm::Type::getInt32Ty(context), 100));
+}
+
 llvm::Value* LLVMGenerator::integerNum(const int &num)
 {
     // may have a bug

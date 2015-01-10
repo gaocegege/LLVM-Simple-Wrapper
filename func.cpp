@@ -4,6 +4,7 @@
 int main(int argc, char const *argv[])
 {
 	llvmgenerator::LLVMGenerator testCase;
+	llvm::Value *id = testCase.globalVariable("cece");
 	std::vector<std::string> v;
 	v.push_back("n");
 	llvm::Function *func = testCase.func("jiecheng", v, "int");
