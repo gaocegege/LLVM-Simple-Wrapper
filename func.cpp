@@ -9,6 +9,8 @@ int main(int argc, char const *argv[])
 	v.push_back("n");
 	llvm::Function *func = testCase.func("jiecheng", v, "int");
 	std::cout << testCase.nvt["n"] << "\n";
+	testCase.getArrayValue(id, testCase.integerNum(1));
+	testCase.callPrint(testCase.getArrayValue(id, testCase.integerNum(1)));
 	llvm::Value *cond = testCase.expression('>', testCase.nvt["n"], testCase.integerNum(1));
 	// testCase.ret(testCase.nvt["n"]);
 	testCase.ret(testCase.ifStat(cond));

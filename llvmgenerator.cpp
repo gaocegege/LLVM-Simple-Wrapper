@@ -57,6 +57,135 @@ void LLVMGenerator::mainProto()
 
 }
 
+// void LLVMGenerator::quicksort()
+// {
+// 	llvm::Value *id = globalVariable("cece");
+// 	std::vector<std::string> v;
+// 	v.push_back("left");
+// 	v.push_back("right");
+// 	llvm::Function *func = func("quicksort", v, "void");
+// 	llvm::Value *cond = expression('<', nvt["left"], nvt["right"]);
+// 	llvm::Value *CondV = builder->CreateFCmpONE(cond,
+//                               doubleNum(0),
+//                               "ifcond");
+//     llvm::Function *TheFunction = builder->GetInsertBlock()->getParent();
+
+//     // // Create blocks for the then and else cases.  Insert the 'then' block at the
+//     // // end of the function.
+//     llvm::BasicBlock *ThenBB = llvm::BasicBlock::Create(context, "then", TheFunction);
+//     llvm::BasicBlock *ElseBB = llvm::BasicBlock::Create(context, "else");
+//     llvm::BasicBlock *MergeBB = llvm::BasicBlock::Create(context, "ifcont");
+
+//     builder->CreateCondBr(CondV, ThenBB, ElseBB);
+
+//     builder->SetInsertPoint(ThenBB);
+
+//     // //generate then block
+//     // llvm::Value *ThenV = Then->Codegen();
+//     llvm::Value *pivot = identifier("pivot");
+//     llvm::Value *vj = identifier("j");
+//     llvm::Value *vk = identifier("k");
+//     setValue(vj, expression('+', left, integerNum(1)));
+//     setValue(vk, expression('+', right, integerNum(1)));
+
+//     llvm::BasicBlock* cond_while =
+//     llvm::BasicBlock::Create(context, "while", TheFunction);
+
+//     llvm::BasicBlock* while_body =
+//     llvm::BasicBlock::Create(context, "whileloop", TheFunction);
+
+//     llvm::BasicBlock* cond_continue =
+//     llvm::BasicBlock::Create(context, "whileend", TheFunction);
+
+//     builder->CreateBr(cond_while);
+//     builder->SetInsertPoint(cond_while);
+
+//     llvm::Value * expcond = expression('<', vj, vk);
+//     expcond = builder->CreateIntCast(expcond, llvm::Type::getInt1Ty(context);,true);
+//     expcond = builder->CreateICmpEQ(expcond, llvm::ConstantInt::get(context,llvm::APInt(1,0,true)), "tmp");
+
+//     builder->CreateCondBr(expcond, cond_continue, while_body);
+
+//     //bug
+//     llvm::Value *cond1 = expression('<', getArrayValue(id, getValue(vj)), getArrayValue(id, getValue(nvt["left"])));
+
+//     llvm::Value *CondV1 = builder->CreateFCmpONE(cond1,
+//                               doubleNum(0),
+//                               "ifcond");
+
+//     // // Create blocks for the then and else cases.  Insert the 'then' block at the
+//     // // end of the function.
+//     llvm::BasicBlock *ThenBB1 = llvm::BasicBlock::Create(context, "then", TheFunction);
+//     llvm::BasicBlock *ElseBB1 = llvm::BasicBlock::Create(context, "else");
+//     llvm::BasicBlock *MergeBB1 = llvm::BasicBlock::Create(context, "ifcont");
+
+//     builder->CreateCondBr(CondV1, ThenBB1, ElseBB1);
+
+//     builder->SetInsertPoint(ThenBB1);
+
+//     setValue(pivot, expression('+', pivot, integerNum(1)));
+//     llvm::Value *tmp = identifier("tmp");
+//     setValue(tmp, getArrayValue(id, getValue(pivot)));
+//     setArrayValue(id, getArrayValue(id, vj, pivot));
+//     setArrayValue(id, tmp, vj);
+
+//     builder->CreateBr(MergeBB);
+//     //  // Codegen of 'Then' can change the current block, update ThenBB for the PHI.
+//     ThenBB = builder->GetInsertBlock();
+
+//     //  // Emit else block.
+//     TheFunction->getBasicBlockList().push_back(ElseBB);
+//     builder->SetInsertPoint(ElseBB);
+
+//     //  //generate else block
+//     //  // Value *ElseV = Else->Codegen();
+//     llvm::Value *ElseV = integerNum(1);
+
+//     builder->CreateBr(MergeBB);
+//     //  // Codegen of 'Else' can change the current block, update ElseBB for the PHI.
+//     ElseBB = builder->GetInsertBlock();
+
+//     //  // Emit merge block.
+//     TheFunction->getBasicBlockList().push_back(MergeBB);
+//     builder->SetInsertPoint(MergeBB);
+//     setValue(vj,expression('+', vj, integerNum(1)));
+
+//     // while_body = body->codegen();
+//     builder->SetInsertPoint(while_body);
+//     builder->CreateBr(cond_while);
+
+//     cond_continue->moveAfter(while_body);
+
+//     return cond_continue;
+
+
+//     builder->CreateBr(MergeBB);
+//     //  // Codegen of 'Then' can change the current block, update ThenBB for the PHI.
+//     ThenBB = builder->GetInsertBlock();
+
+//     //  // Emit else block.
+//     TheFunction->getBasicBlockList().push_back(ElseBB);
+//     builder->SetInsertPoint(ElseBB);
+
+//     //  //generate else block
+//     //  // Value *ElseV = Else->Codegen();
+//     llvm::Value *ElseV = integerNum(1);
+
+//     builder->CreateBr(MergeBB);
+//     //  // Codegen of 'Else' can change the current block, update ElseBB for the PHI.
+//     ElseBB = builder->GetInsertBlock();
+
+//     //  // Emit merge block.
+//     TheFunction->getBasicBlockList().push_back(MergeBB);
+//     builder->SetInsertPoint(MergeBB);
+//     llvm::PHINode *PN =
+//         builder->CreatePHI(llvm::Type::getInt32Ty(context), 2, "iftmp");
+
+//     PN->addIncoming(ThenV, ThenBB);
+//     PN->addIncoming(ElseV, ElseBB);
+//     return PN;
+// }
+
 llvm::Value* LLVMGenerator::call(llvm::Function *CalleeF, const std::vector<llvm::Value *> &arguments)
 {
     // change from string to Function type
@@ -185,7 +314,8 @@ llvm::Value *LLVMGenerator::globalVariable(const std::string &name)
 // /*Linkage=*/GlobalValue::CommonLinkage,
 // /*Initializer=*/0, // has initializer, specified below
 // name);
-	module->getOrInsertGlobal(name, llvm::ArrayType::get(llvm::Type::getInt32Ty(context), 100));
+	llvm::Value*id = module->getOrInsertGlobal(name, llvm::ArrayType::get(llvm::Type::getInt32Ty(context), 100));
+    return id;
 }
 
 llvm::Value* LLVMGenerator::integerNum(const int &num)
